@@ -1,69 +1,56 @@
-# Python Module Creator
+# Python Module Creation Script
 
-This bash script is designed to create a Python module with a pre-defined directory structure and necessary files for development. It prompts the user to enter the module name and target directory. Then it creates the file directory structure and necessary files in the target directory.
-
-The script checks if Zenity is installed or not. If it is not installed, then it asks the user to install Zenity and try again.
-
-The file directory structure that this script creates is as follows:
-
-```
-module_name/
-    components/
-        __init__.py
-        functions.py
-        utils/
-            __init__.py
-            cmd/
-                cmd.py
-            class_calls.py
-            path_utils/
-                __init__.py
-                mapping_dirs.py
-                path_map.py
-    class/
-    __init__.py
-    path_map.py
-    read_me/
-        __init__.txt
-        custom_utils.txt
-    $module_name.py
-    setup.py
-    custom_utils.py
-    $module_name.egg-info/
-        PKG-INFO
-        SOURCES.txt
-        dependency_links.txt
-        top_level.txt
-        requires.txt
-    __pycache__/
-        custom_utils.cpython-310.pyc
-        $module_name.cpython-310.pyc
-        __init__.cpython-310.pyc
-    path_map.py
-```
-
-The script prompts the user to select the library directories for the `path_libraries` dictionary. The script uses the Zenity file selection dialog to select the library directories. The `path_libraries` dictionary maps the library name to its directory path.
-
-After creating the file directory structure, the script prompts the user to select the Python files for importing libraries in each directory. It then generates import statements and writes them to the main Python file.
-
-The script then creates an `__init__.py` file for each library directory and writes import statements to it.
-
-Finally, the script generates the `setup.py` file with extracted dependencies.
+This bash script automates the process of creating a Python module, including the module structure and necessary files. The script allows the user to define the module name, target directory, and additional directory imports using Zenity dialogs. 
 
 ## Requirements
 
-This script requires Zenity to be installed on the system.
+- Zenity (for dialog prompts)
+- Python 3
 
 ## Usage
 
-To use this script, run the following command:
+1. Ensure Zenity is installed on your system. If not, install it using the package manager for your distribution. For example, on Ubuntu, you can use `sudo apt-get install zenity`.
 
-```bash
-bash create_python_module.sh
+2. Save the provided bash script to a file, e.g., `create_module.sh`.
+
+3. Make the script executable by running `chmod +x create_module.sh`.
+
+4. Run the script using `./create_module.sh`. Follow the prompts to define the module name, target directory, and additional directory imports (if any).
+
+## What the script does
+
+1. Checks if Zenity is installed. If not, it displays an error message and exits.
+
+2. Asks the user for the module name using a Zenity dialog.
+
+3. Prompts the user to choose the target directory for the module using a Zenity file selection dialog.
+
+4. Creates the module structure, including the main module file, `__init__.py`, `components` directory, and `all_functions` directory.
+
+5. Asks the user if they want to add additional directory imports. If yes, it prompts the user to select the directories using Zenity file selection dialogs.
+
+6. Generates the main module file (`<module_name>.py`), which includes a function to import all modules from a folder, import components, import additional directories (if specified), save function lists, and find duplicate functions.
+
+7. Generates a `setup.py` file for the module, including the package name, version, and entry points.
+
+8. Changes to the module directory and runs `python3 setup.py develop --user` to install the module in development mode.
+
+## Output
+
+The script creates a Python module with the following structure:
+
+```
+<target_dir>/
+  <module_name>/
+    __init__.py
+    <module_name>.py
+    setup.py
+    components/
+    all_functions/
+      all_modules.json
+      all_functions.json
+      all_function_duplicates.json
 ```
 
-This will launch the script, which will prompt the user to enter the module name and target directory. The script will then create the file directory structure and necessary files in the target directory.
-
-## Acknowledgments
-
-This script was inspired by [Python Boilerplate](https://github.com/cookiecutter/cookiecutter-pypackage), a project template for Python packages.
+The generated module can be imported and used in other Python projects.
+```
