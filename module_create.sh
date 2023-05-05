@@ -50,26 +50,40 @@ cat > "$module_file_path" << EOL
 import os
 import sys
 import json
+import importlib
+import importlib.util
 from collections import defaultdict
 
 # Function to import all modules from a directory
 def import_all_from_folder(folder_path):
     modules = []
     functions = defaultdict(list)
+
+    # Append the folder_path and all its subdirectories to sys.path
+    for root, dirs, files in os.walk(folder_path):
+        sys.path.append(root)
+
     for root, dirs, files in os.walk(folder_path):
         for file in files:
             if file.endswith('.py'):
-                sys.path.append(root)
                 module_name = file[:-3]
-                module = __import__(module_name)
+                module_path = os.path.relpath(root, folder_path).replace(os.sep, ".")
+                if module_path:
+                    module_name = f"{module_path}.{module_name}"
+                
+                spec = importlib.util.spec_from_file_location(module_name, os.path.join(root, file))
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+
                 modules.append(module_name)
 
                 for attr_name in dir(module):
                     attr = getattr(module, attr_name)
                     if callable(attr) and not attr_name.startswith('_'):
                         functions[module_name].append(attr_name)
+                        # Add the function directly to the current module's globals
+                        globals()[attr_name] = attr
     return modules, functions
-
 # Import all components
 components_dir = os.path.join(os.path.dirname(__file__), "components")
 modules, functions = import_all_from_folder(components_dir)
