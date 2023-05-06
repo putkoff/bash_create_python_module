@@ -18,29 +18,34 @@ pip install setuptools wheel twine
 if [ -f .env ]; then
     echo "Reading values from .env file..."
     package_name=$(get_value "PACKAGE_NAME" "Enter your package name:")
-    package_description=$(get_value "PACKAGE_DESCRIPTION" "Enter a short package description:")
-    your_name=$(get_value "YOUR_NAME" "Enter your name:")
+    package_description=$(get_value "PACKAGE_DESCRIPTION" "Enter a short package description or a file path:")
+    your_name=$(get_value "YOUR_NAME" "Enter your username:")
     your_email=$(get_value "YOUR_EMAIL" "Enter your email:")
 else
     echo "Enter your package name:"
     read package_name
-    echo "Enter a short package description:"
+    echo "Enter a short package description or a file path:"
     read package_description
-    echo "Enter your name:"
+    echo "Enter your username:"
     read your_name
     echo "Enter your email:"
     read your_email
 fi
 
-mkdir $package_name
-cd $package_name
+# If package_description is a file, read its contents
+if [ -f "$package_description" ]; then
+    package_description=$(cat "$package_description")
+fi
+
+module_path=$(zenity --file-selection --directory --title="Select your existing local module")
+
+cp -r "$module_path" "./$package_name"
+cd $package_name || exit 1
 
 echo "Creating necessary files..."
 touch setup.py
 touch README.md
 touch .gitignore
-mkdir $package_name
-touch $package_name/__init__.py
 
 cat <<EOT >> setup.py
 from setuptools import setup, find_packages
@@ -77,6 +82,6 @@ echo "Packaging your code..."
 python3 setup.py sdist bdist_wheel
 
 echo "Uploading your package to PyPI..."
-twine upload dist/*
+twine upload dist/* --username "$your_name" --password "$(zenity --password --title='Enter your PyPI password')"
 
 echo "Package uploaded to PyPI successfully!"
